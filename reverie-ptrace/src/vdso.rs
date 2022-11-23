@@ -146,11 +146,11 @@ lazy_static! {
         for (k, v) in VDSO_SYMBOLS {
             if let Some(&(base, size)) = info.get(*k) {
                 assert!(
-                    v.len() <= size,
+                    v.len().div_ceil(8) <= size.div_ceil(8),
                     "vdso symbol {}'s real size is {} bytes, but trying to replace it with {} bytes",
                     k,
-                    size,
-                    v.len()
+                    size.div_ceil(8),
+                    v.len().div_ceil(8)
                 );
                 res.insert(*k, (base, size, *v));
             }
@@ -225,10 +225,9 @@ where
 
         for (name, (offset, size, bytes)) in VDSO_PATCH_INFO.iter() {
             let start = vdso.address.0 + offset;
-            assert!(bytes.len() <= *size);
+            assert!(bytes.len().div_ceil(8) <= (*size).div_ceil(8));
             let rptr = AddrMut::from_raw(start as usize).unwrap();
             memory.write_exact(rptr, bytes)?;
-            assert!(*size >= bytes.len());
             if *size > bytes.len() {
                 let fill: Vec<u8> = std::iter::repeat(0x90u8).take(size - bytes.len()).collect();
                 memory.write_exact(unsafe { rptr.add(bytes.len()) }, &fill)?;

@@ -30,6 +30,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![feature(internal_output_capture)]
 #![feature(never_type)]
+#![feature(int_roundings)]
 
 mod children;
 mod cp;
